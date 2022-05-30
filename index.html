@@ -1,0 +1,32 @@
+<html>
+  <head>
+
+	  <meta charset="UTF-8">
+  	<title>Chess</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
+    <script src="sketchs/chess.js"></script>
+    <link rel="stylesheet" type="text/css"  href="style.css" />
+  </head>
+
+  <body>
+    <div class="main">
+      <main id="screen"></main>
+    </div>
+    <button id="btnTeste">TESTE</button>
+  </body>
+
+<script>
+  document.querySelector('#btnTeste').addEventListener('click',()=>{
+
+    A = checkMoves(board.pieces,1)
+    B = checkAtack('b5', A)
+
+
+    console.log(B)
+
+  })
+
+
+</script>
+
+</html>
