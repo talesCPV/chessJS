@@ -276,7 +276,7 @@ function options(pos,defense=false){
 }
 
 function checkMoves(BOARD,COLOR, DEFENSE=true){ // all moves possible by color
-  
+
   let out = []
   for(let y=0; y<8; y++){
     for(let x=0; x<8; x++){
@@ -305,4 +305,18 @@ function checkAtack(pos, moves){ // Who can get this pos?
 
 }
 
+function play(myColor){
+
+  therColor = myColor == 0 ? 1 : 0  
+  myPieces   = checkMoves(board.pieces, myColor, false)
+  therPieces = checkMoves(board.pieces, therColor)
+
+  
+
+  console.log(myPieces)
+  console.log(therPieces)
+
+
+
+}
 

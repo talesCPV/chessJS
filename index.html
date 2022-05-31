@@ -25,7 +25,7 @@
       <option value="0">White</option>
       <option value="1">Black</option>
     </select>
-    <button id="btnTeste">TESTE</button>
+    <button id="btnTeste">PLAY</button>
   </body>
 
 <script>
@@ -55,17 +55,20 @@
       break
     }
 
-
   })
 
 
 
   document.querySelector('#btnTeste').addEventListener('click',()=>{
 
+/*    
     A = checkMoves(board.pieces,document.querySelector('#cmbColor').value) // table with all moves by color
     B = checkAtack(document.querySelector('#edtPos').value , A)        // this positions is safe?
-
     console.log(B)
+*/
+
+    play(document.querySelector('#cmbColor').value)
+
 
   })
 
