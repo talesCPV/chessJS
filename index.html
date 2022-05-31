@@ -9,18 +9,61 @@
   </head>
 
   <body>
+    Board Color:
+    <select id="cmbBoard">
+      <option value="0">Blue</option>
+      <option value="1">Green</option>
+      <option value="2">Brown</option>
+      <option value="3">Red</option>
+      <option value="4">Gray</option>
+    </select>
     <div class="main">
       <main id="screen"></main>
     </div>
+    <input type="text" id="edtPos" value="b6">
+    <select id="cmbColor">
+      <option value="0">White</option>
+      <option value="1">Black</option>
+    </select>
     <button id="btnTeste">TESTE</button>
   </body>
 
 <script>
+
+  document.querySelector('#cmbBoard').addEventListener('change',()=>{
+   
+    switch(parseInt(document.querySelector('#cmbBoard').value)){
+      case 0:  // blue
+        board.white = [240,238,241]
+        board.black = [112,134,184]
+      break
+      case 1:  // greem
+        board.white = [321,321,203]
+        board.black = [114,145,83]
+      break
+      case 2:  // brown
+        board.white = [247,204,153]
+        board.black = [171,107,62]
+      break
+      case 3:  // red
+        board.white = [255,252,237]
+        board.black = [126,33,41]
+      break
+      case 4:  // gray
+        board.white = 247
+        board.black = 148
+      break
+    }
+
+
+  })
+
+
+
   document.querySelector('#btnTeste').addEventListener('click',()=>{
 
-    A = checkMoves(board.pieces,1)
-    B = checkAtack('b5', A)
-
+    A = checkMoves(board.pieces,document.querySelector('#cmbColor').value) // table with all moves by color
+    B = checkAtack(document.querySelector('#edtPos').value , A)        // this positions is safe?
 
     console.log(B)
 

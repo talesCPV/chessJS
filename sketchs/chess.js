@@ -160,7 +160,7 @@ function change(A,B){
   return out
 }
 
-function options(pos){
+function options(pos,defense=false){
 
   function check(x,y){ // return [can get / can continue] 
     if(x>=0 && x<8 && y>=0 && y<8){
@@ -221,15 +221,24 @@ function options(pos){
         y_ = 1
       }
 
-      Q = (pos[1] == 6 || pos[1] == 1) && check(pos[0],pos[1] + y_* 2)[1] ? 2 : 1 // start position  
-      front = check(pos[0]  ,pos[1] +y_)
-      right = check(pos[0]+1,pos[1] +y_)
-      left  = check(pos[0]-1,pos[1] +y_)
-      
-      front[1] ? look(0,y_) : 0
-      Q=1
-      right[0] && !right[1] ? look(1,y_) : 0
-      left[0]  && !left[1]  ? look(-1,y_) : 0
+      if(defense){
+        Q=1
+        look(1,y_)
+        look(-1,y_)
+      }else{
+
+        Q = (pos[1] == 6 || pos[1] == 1) && check(pos[0],pos[1] + y_* 2)[1] ? 2 : 1 // start position  
+        front = check(pos[0]  ,pos[1] +y_)
+        right = check(pos[0]+1,pos[1] +y_)
+        left  = check(pos[0]-1,pos[1] +y_)
+        
+        front[1] ? look(0,y_) : 0
+        Q=1
+        right[0] && !right[1] ? look(1,y_) : 0
+        left[0]  && !left[1]  ? look(-1,y_) : 0
+
+      }
+
     }
   }
 
@@ -266,20 +275,20 @@ function options(pos){
   return opt
 }
 
-function checkMoves(BOARD,COLOR){ // all moves possible by color
+function checkMoves(BOARD,COLOR, DEFENSE=true){ // all moves possible by color
+  
   let out = []
   for(let y=0; y<8; y++){
     for(let x=0; x<8; x++){
       if(BOARD[y][x][1] == COLOR){
         move = new Object
         move.start = convertNote([x,y],'toNote')
-        move.end = options(move.start)
+        move.end = options(move.start,DEFENSE)
         move.value = 10 - BOARD[y][x][0]
         out.push(move)
       }
     }
   }
-
   return out
 
 }
@@ -287,15 +296,13 @@ function checkMoves(BOARD,COLOR){ // all moves possible by color
 function checkAtack(pos, moves){ // Who can get this pos?
 
   out = []
-
   for( let i=0; i<moves.length; i++){
     if(moves[i].end.includes(pos)){
       out.push([moves[i].start,moves[i].value])
     }
-
   }
-
   return out
+
 }
 
 
