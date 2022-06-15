@@ -30,8 +30,8 @@
 
 <script>
 
-  document.querySelector('#cmbBoard').addEventListener('change',()=>{
-   
+  function changeColor(){
+
     switch(parseInt(document.querySelector('#cmbBoard').value)){
       case 0:  // blue
         board.white = [240,238,241]
@@ -55,9 +55,18 @@
       break
     }
 
+  }
+
+
+  document.querySelector('#cmbBoard').addEventListener('change',()=>{
+   
+    changeColor()
+
   })
 
+  changeColor()
 
+  player = 0
 
   document.querySelector('#btnTeste').addEventListener('click',()=>{
 
@@ -67,8 +76,13 @@
     console.log(B)
 */
 
-    play(document.querySelector('#cmbColor').value)
+    let edt = document.querySelector('#edtPos').value
+    let color = document.querySelector('#cmbColor').value
 
+//    play(document.querySelector('#cmbColor').value)
+    play(player)
+
+    player = player == 0 ? 1 : 0 
 
   })
 

@@ -9,6 +9,7 @@ const board = new Object
   board.pieces = []
   board.options = []
   board.select = 'no'
+  board.turn = 0
 
 function preload(){
   spritedata = loadJSON('assets/Pieces.json');
@@ -40,6 +41,11 @@ function draw() {
   drawBoard()
   markPos()
 
+  if(board.turn > 0){
+    play(1)
+    board.turn = 0
+  }
+
 }
 
 function mousePressed() {
@@ -55,13 +61,17 @@ function mousePressed() {
       }else{        
         if(board.options.includes(newPos)){
           board.pieces = change(board.select,newPos)
+          board.turn = 1
         }        
         board.select = 'no'          
       }        
     }
   }
-  board.options = options(board.select)
+
+  board.options = options(board.pieces, board.select)
 }
+
+/*  BOARD FUNCTIONS  */
 
 function resetBoard(){
   for(let i=0; i<8; i++){
@@ -109,18 +119,6 @@ function plot(color,piece,x,y){
 
 }
 
-function convertNote(N,DIR='toPos'){
-  let resp
-  if(DIR == 'toPos'){ // toPos / toNote
-    resp = [0,0]
-    resp[0] = N.charCodeAt(0) - 97
-    resp[1] = 8 - N[1]
-  }else{
-    resp = String(String.fromCharCode(97+N[0])+(8-N[1]))
-  }
-  return resp
-}
-
 function markPos(){
 
   function drawSquare(x,y,color){
@@ -149,6 +147,28 @@ function markPos(){
   strokeWeight(1);
 }
 
+/*  CHESS FUNCTIONS  */
+
+function convertNote(N,DIR='toPos'){
+  let resp
+  if(DIR == 'toPos'){ // toPos / toNote
+    resp = [0,0]
+    resp[0] = N.charCodeAt(0) - 97
+    resp[1] = 8 - N[1]
+  }else{
+    resp = String(String.fromCharCode(97+N[0])+(8-N[1]))
+  }
+  return resp
+}
+
+function getValue(field,pos){
+  xy = convertNote(pos)
+  val = 10 - field[xy[1]][xy[0]][0]
+  val = val==9 ? 1000 : val // rei
+  val = val==11 ? 0 : val   // vazio
+  return val
+}
+
 function change(A,B){
   console.log(A+','+B)
 
@@ -160,12 +180,12 @@ function change(A,B){
   return out
 }
 
-function options(pos,defense=false){
+function options(field,pos,defense=false){
 
   function check(x,y){ // return [can get / can continue] 
     if(x>=0 && x<8 && y>=0 && y<8){
-      PIECE = board.pieces[y][x][0]
-      COLOR = board.pieces[y][x][1]    
+      PIECE = field[y][x][0]
+      COLOR = field[y][x][1]    
       return  PIECE < 0 ? [true,true] : COLOR != val[1] ? [true,false] : [false,false]  
     }
     return [false,false]
@@ -245,9 +265,9 @@ function options(pos,defense=false){
   opt = []
 
   if(pos != 'no'){
-  
+
     pos = convertNote(pos)  
-    val = board.pieces[pos[1]][pos[0]]
+    val = field[pos[1]][pos[0]]
   
     switch(val[0]){
       case 0: // Queen
@@ -283,7 +303,7 @@ function checkMoves(BOARD,COLOR, DEFENSE=true){ // all moves possible by color
       if(BOARD[y][x][1] == COLOR){
         move = new Object
         move.start = convertNote([x,y],'toNote')
-        move.end = options(move.start,DEFENSE)
+        move.end = options(BOARD,move.start,DEFENSE)
         move.value = 10 - BOARD[y][x][0]
         out.push(move)
       }
@@ -305,18 +325,85 @@ function checkAtack(pos, moves){ // Who can get this pos?
 
 }
 
+function clone(BOARD){
+  out = BOARD.slice()
+  for(let i=0; i< out.length; i++){
+    out[i] = out[i].slice()
+  }
+  return out
+}
+
 function play(myColor){
 
-  therColor = myColor == 0 ? 1 : 0  
-  myPieces   = checkMoves(board.pieces, myColor, false)
-  therPieces = checkMoves(board.pieces, therColor)
+  function makeMove(){      
 
+    op = [myMoves[0]]
+    index = 0
+    for(let i=1; i<myMoves.length; i++){
+      if(myMoves[i][2] == myMoves[index][2]){
+        op.push(myMoves[i])
+      }else if(myMoves[i][2] > myMoves[index][2]){
+        op = [myMoves[i]]      
+      }
+      index = myMoves[i][2] > myMoves[index][2] ? i : index
+    }
+
+    sort =  Math.floor(Math.random() * op.length)
+
+    change(op[sort][0],op[sort][1])
+
+  }
+
+  function listMoves(player){
+    out = []
+    for(let i=0; i< player.length; i++){
+      for(let j=0; j<player[i].end.length; j++){
+        out.push([player[i].start,player[i].end[j],0  ])
+      }
+    }  
+    return out
+  }
+
+  function dangerPlace(BOARD,pos){
+    BOARD = clone(BOARD)
+    xy = convertNote(pos)
+    BOARD[xy[1]][xy[0]] = [5,myColor]
+    enemyMoves = listMoves(checkMoves(BOARD, therColor, true))
+
+    for(let i=0; i<enemyMoves.length; i++){
+     if(enemyMoves[i][1] == pos){
+        return true
+      }
+    }
+    return false
+  }
   
+  function killPlace(pos){
+    for(let i=0; i<therPieces.length; i++){
+      if(therPieces[i].start == pos){
+         return therPieces[i].value * 50
+       }
+     }
+     return 0
+   }
 
-  console.log(myPieces)
-  console.log(therPieces)
 
+  myColor = parseInt(myColor)
+  myPieces   = checkMoves(board.pieces, myColor, false)
+  therColor = myColor == 0 ? 1 : 0 
+  therPieces = checkMoves(board.pieces, therColor, true)
 
+  myMoves = listMoves(myPieces)
+  theirMoves = listMoves(therPieces)
+
+  for(let i=0; i<myMoves.length; i++){
+    myMoves[i][2] += dangerPlace(board.pieces,myMoves[i][0]) ? 50 * getValue(board.pieces,myMoves[i][0]) : 50
+    myMoves[i][2] += dangerPlace(board.pieces,myMoves[i][1]) ? -50 * getValue(board.pieces,myMoves[i][0]) : 50
+    myMoves[i][2] += killPlace(myMoves[i][1]) 
+  }
+
+  console.log(myMoves)
+  makeMove()
 
 }
 
